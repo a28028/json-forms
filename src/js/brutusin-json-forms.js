@@ -177,6 +177,7 @@ if (typeof brutusin === "undefined") {
             } else if (s.media) {
                 input = document.createElement("input");
                 input.type = "file";
+                appendChild(input, option, s);
                 // XXX TODO, encode the SOB properly.
             } else if (s.enum) {
                 input = document.createElement("select");
@@ -503,7 +504,7 @@ if (typeof brutusin === "undefined") {
                             if (current.hasOwnProperty(oldPropertyName) || regExp && pp.getValue().search(regExp) === -1) {
                                 current[pp.getValue()] = current[oldPropertyName];
                                 delete current[oldPropertyName];
-                            }
+                            }														 
                         });
 
                 nameInput.onblur = function () {
@@ -677,6 +678,21 @@ if (typeof brutusin === "undefined") {
                 appendChild(container, div, s);
             } else {
                 appendChild(container, table, s);
+                var toggleButton = document.createElement("button");
+                toggleButton.setAttribute('type', 'button');
+                toggleButton.className = "toggle";
+                toggleButton.append(document.createTextNode("-"));
+                toggleButton.onclick = function () {
+                    $(this.parentNode.parentNode.childNodes[1].childNodes[0]).toggle();
+                    this.textContent = this.textContent == '-' ? '+' : '-'
+                };
+                // appendChild(td1_a, toggleButton, []);
+                //prop-name
+                if (container.parentElement.childNodes[0].className == 'prop-name') {
+                    appendChild(container.parentElement.childNodes[0], toggleButton, []);
+                    $(toggleButton).click();
+                }
+
             }
         };
         // end of object renderer
@@ -711,6 +727,17 @@ if (typeof brutusin === "undefined") {
                     computRowCount();
                 };
                 appendChild(td2, removeButton, s);
+                var toggleButton = document.createElement("button");
+                toggleButton.setAttribute('type', 'button');
+                toggleButton.className = "toggle";
+                if (readOnly === true)
+                    toggleButton.disabled = true;
+                appendChild(toggleButton, document.createTextNode("-"), s);
+                toggleButton.onclick = function () {
+                    $(td3.firstElementChild).toggle();
+                    this.textContent = this.textContent == '-' ? '+' : '-'
+                };
+                appendChild(td2, toggleButton, s);
                 var number = document.createTextNode(table.rows.length + 1);
                 appendChild(td1, number, s);
                 appendChild(tr, td1, s);
@@ -722,6 +749,7 @@ if (typeof brutusin === "undefined") {
                     return tr.rowIndex;
                 });
                 render(null, td3, id, current, pp, value);
+                $(toggleButton).click();
             }
 
             var schemaId = getSchemaId(id);
@@ -750,7 +778,7 @@ if (typeof brutusin === "undefined") {
             if (s.readOnly)
                 addButton.disabled = true;
             addButton.setAttribute('type', 'button');
-            addButton.className = "addItem";
+											
             addButton.getValidationError = function () {
                 if (s.minItems && s.minItems > table.rows.length) {
                     return BrutusinForms.messages["minItems"].format(s.minItems);
@@ -783,6 +811,19 @@ if (typeof brutusin === "undefined") {
                 }
             }
             appendChild(container, div, s);
+
+            var toggleButton = document.createElement("button");
+            toggleButton.setAttribute('type', 'button');
+            toggleButton.className = "toggle";
+            toggleButton.append(document.createTextNode("-"));
+            toggleButton.onclick = function () {
+                $(div).toggle();
+                this.textContent = this.textContent == '-' ? '+' : '-'
+            };
+            // appendChild(td1_a, toggleButton, []);
+            //prop-name
+            appendChild(container.parentElement.firstChild, toggleButton, []);
+            $(toggleButton).click();
         };
         // end of array render
         /**
@@ -1070,7 +1111,7 @@ if (typeof brutusin === "undefined") {
                         var s = schema.patternProperties[pat];
 
                         if (s.hasOwnProperty("type") || s.hasOwnProperty("$ref") ||
-                                s.hasOwnProperty("oneOf")) {
+                            s.hasOwnProperty("oneOf")) {
                             populateSchemaMap(patChildProp, schema.patternProperties[pat]);
                         } else {
                             populateSchemaMap(patChildProp, SCHEMA_ANY);
@@ -1081,7 +1122,7 @@ if (typeof brutusin === "undefined") {
                     var childProp = name + "[*]";
                     pseudoSchema.additionalProperties = childProp;
                     if (schema.additionalProperties.hasOwnProperty("type") ||
-                            schema.additionalProperties.hasOwnProperty("oneOf")) {
+                        schema.additionalProperties.hasOwnProperty("oneOf")) {
                         populateSchemaMap(childProp, schema.additionalProperties);
                     } else {
                         populateSchemaMap(childProp, SCHEMA_ANY);
@@ -1255,7 +1296,7 @@ if (typeof brutusin === "undefined") {
                 return input.getValue();
             }
             var value;
-            
+
             if (input.tagName.toLowerCase() === "select") {
                 value = input.options[input.selectedIndex].value;
             } else {
@@ -1311,7 +1352,7 @@ if (typeof brutusin === "undefined") {
 
         function cleanSchemaMap(schemaId) {
             for (var prop in schemaMap) {
-                if (prop.startsWith(schemaId)) {
+                if (schemaId.startsWith(schemaId)) {
                     delete schemaMap[prop];
                 }
             }
@@ -1462,8 +1503,8 @@ if (typeof brutusin === "undefined") {
                             visit(name, queue, child, data, currentToken);
                         }
                     } else if ("boolean" === typeof data
-                            || "number" === typeof data
-                            || "string" === typeof data) {
+                        || "number" === typeof data
+                        || "string" === typeof data) {
                         throw ("Node is leaf but still are tokens remaining: " + currentToken);
                     } else {
                         throw ("Node type '" + typeof data + "' not supported for index field '" + name + "'");
